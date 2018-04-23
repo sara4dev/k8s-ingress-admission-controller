@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-cloud-ingress
+  namespace: kube-system
+  labels:
+    name: hello-cloud-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: hello-cloud-service
+          servicePort: 80

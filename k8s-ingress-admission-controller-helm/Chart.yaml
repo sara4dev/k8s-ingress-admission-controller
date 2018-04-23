@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for admission-controller-ingress
+name: k8s-ingress-admission-controller-helm
+version: 0.1.0

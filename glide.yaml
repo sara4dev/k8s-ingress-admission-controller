@@ -1,0 +1,14 @@
+package: k8s-ingress-admission-controller
+import:
+- package: github.com/golang/glog
+- package: k8s.io/api
+  version: kubernetes-1.9.0
+- package: k8s.io/apimachinery
+  version: kubernetes-1.9.0
+  subpackages:
+  - pkg/apis/meta/v1
+- package: k8s.io/client-go
+  version: ~6.0.0
+  subpackages:
+  - kubernetes
+  - rest
