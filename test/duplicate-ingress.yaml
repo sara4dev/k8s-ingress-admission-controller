@@ -7,7 +7,7 @@ metadata:
     name: hello-cloud-ingress
 spec:
   rules:
-  - host: hello-cloud.us-central-1.core.k8s.tgt
+  - host: hello-cloud.kubernetes.io
     http:
       paths:
       - path: /
@@ -26,7 +26,7 @@ metadata:
     name: hello-cloud-ingress
 spec:
   rules:
-  - host: hello-cloud.us-central-1.core.k8s.tgt
+  - host: hello-cloud.kubernetes.io
     http:
       paths:
       - path: /
