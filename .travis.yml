@@ -19,6 +19,8 @@ script:
   - cd ./src
   - ./gen-cert.sh
   - cd ..
+  - pwd
+  - ls
   - go build -v -o k8s-ingress-admission-controller ./src/
 
 after_success:
