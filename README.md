@@ -11,7 +11,7 @@ In particular it denies `ingress` with
 * Local Host (localhost)
 * Duplicate Host/Path
 
-This code is inspired from the [example] (https://github.com/caesarxuchao/example-webhook-admission-controller), but made it to work with Kubernetes 1.9
+This code is inspired from the [example-webhook-admission-controller](https://github.com/caesarxuchao/example-webhook-admission-controller), but made it to work with Kubernetes 1.9
 
 
 ## Prerequisite
