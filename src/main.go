@@ -11,6 +11,7 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	extbeta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 func main() {
@@ -96,8 +97,74 @@ func admit(data []byte) *v1beta1.AdmissionResponse {
 			glog.Info(ingress.Namespace + ":" + ingress.Name + " has empty host")
 			return &admissionResponse
 		}
+		// deny wildcard host
+		if rule.Host == "*" {
+			admissionResponse.Allowed = false
+			admissionResponse.Result = &metav1.Status{
+				Message: "Wildcard hostname is not allowed in this cluster",
+				Reason: metav1.StatusReasonForbidden,
+			}
+			glog.Info(ingress.Namespace + ":" + ingress.Name + " has wildcard host")
+			return &admissionResponse
+		}
+		// deny localhost
+		if strings.ToLower(rule.Host) == "localhost" {
+			admissionResponse.Allowed = false
+			admissionResponse.Result = &metav1.Status{
+				Message: "Localhost hostname is not allowed in this cluster",
+				Reason: metav1.StatusReasonForbidden,
+			}
+			glog.Info(ingress.Namespace + ":" + ingress.Name + " has localhost")
+			return &admissionResponse
+		}
+		// deny dupliacte ingress hosts
+		_ingressHostExists, _ingressNamespace, _ingressName :=
+			ingressHostExists(rule, ingress.Namespace, ingress.Name)
+
+		if _ingressHostExists {
+			admissionResponse.Allowed = false
+			admissionResponse.Result = &metav1.Status{
+				Message: "Duplicate hostnames are not allowed in this cluster. Found a duplicate in " +
+					_ingressNamespace + ":" + _ingressName,
+				Reason: metav1.StatusReasonAlreadyExists,
+			}
+			glog.Info(ingress.Namespace + ":" + ingress.Name + " already exists")
+			return &admissionResponse
+		}
 
 	}
 	admissionResponse.Allowed = true
 	return &admissionResponse
+}
+
+func ingressHostExists(ingressRule extbeta1.IngressRule, ingressNamespace string, ingressName string) (bool, string, string) {
+	clientset := getClient()
+	namespaces, error := clientset.CoreV1().Namespaces().List(metav1.ListOptions{})
+	if error != nil {
+		glog.Error("Error while listing the namespaces")
+	}
+	for _, namespace := range namespaces.Items {
+		ingresses, error := clientset.ExtensionsV1beta1().Ingresses(namespace.GetName()).List(metav1.ListOptions{})
+		if error != nil {
+			glog.Error("Error while getting the ingress")
+		}
+		for _, ingress := range ingresses.Items {
+			for _, rule := range ingress.Spec.Rules {
+				if rule.Host == ingressRule.Host {
+					for _, ingressHostPath := range ingressRule.IngressRuleValue.HTTP.Paths {
+						for _, ruleHostPath := range rule.IngressRuleValue.HTTP.Paths {
+							// skip checking against the same ingress during updates
+							if namespace.GetName() != ingressNamespace || ingress.GetName() != ingressName {
+								if ruleHostPath.Path == ingressHostPath.Path {
+									glog.Info("Found duplicate ingress host in " + namespace.GetName() + ":" + ingress.GetName() + ":" + rule.Host + ruleHostPath.Path)
+									return true, namespace.GetName(), ingress.GetName()
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return false, "", ""
 }

@@ -2,6 +2,18 @@
 
 [![Build Status](https://travis-ci.org/saravanakumar-periyasamy/k8s-ingress-admission-controller.svg?branch=master)](https://travis-ci.org/saravanakumar-periyasamy/k8s-ingress-admission-controller)
 
+This [ValidatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#validatingadmissionwebhook-alpha-in-18-beta-in-19) admission controller helps to stop creating bad ingress objects in the multi-tenant clusters. 
+
+In particular it denies `ingress` with
+
+* Empty Host
+* Wilcard Host (*)
+* Local Host (localhost)
+* Duplicate Host/Path
+
+This code is inspired from the [example] (https://github.com/caesarxuchao/example-webhook-admission-controller), but made it to work with Kubernetes 1.9
+
+
 ## Prerequisite
 
 * [minikube](https://github.com/kubernetes/minikube/releases)
