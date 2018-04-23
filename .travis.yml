@@ -1,3 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
 env:
   - CGO_ENABLED=0
 
@@ -6,6 +11,8 @@ language: go
 go:
   - "1.8"
 
+
+
 install: true
 
 script:
@@ -13,12 +20,9 @@ script:
   - ./gen-cert.sh
   - cd ..
   - go build -v -o k8s-ingress-admission-controller ./src/
+
+after_success:
   - docker build -t speriyasamy/k8s-ingress-admission-controller .
-
-sudo: required
-
-services:
-  - docker
 
 deploy:
   provider: script
