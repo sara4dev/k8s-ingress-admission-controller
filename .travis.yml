@@ -6,6 +6,8 @@ language: go
 go:
   - "1.8"
 
+install: true
+
 script:
   - cd ./src
   - ./gen-cert.sh
